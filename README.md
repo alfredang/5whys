@@ -2,6 +2,8 @@
 
 An interactive web-based learning game for adult learners to practice the **5 Whys** root cause analysis technique with AI-guided facilitation.
 
+![5 Whys Root Cause Game](screenshot.png)
+
 ## Live Demo
 
 [**Play the Game**](https://alfredang.github.io/5whys/)
