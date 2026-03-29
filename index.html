@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,13 +11,31 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 :root{
+  --radius:12px;
+  --font-sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --font-mono:'SF Mono',SFMono-Regular,ui-monospace,'DejaVu Sans Mono',Menlo,monospace;
+}
+
+/* ---------- Dark theme (default) ---------- */
+[data-theme="dark"]{
+  --bg:#0f1117;--surface:#1a1b23;--text:#e4e4e7;--muted:#9ca3af;
+  --accent:#818cf8;--accent-light:#a5b4fc;--accent-bg:rgba(129,140,248,.12);
+  --success:#34d399;--success-bg:rgba(52,211,153,.1);--error:#f87171;--error-bg:rgba(248,113,113,.1);
+  --border:#2e2f3a;--shadow:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
+  --shadow-lg:0 10px 25px rgba(0,0,0,.4);
+  --chip-hover:#2a2d3e;--reflection-bg:rgba(250,204,21,.08);
+  color-scheme:dark;
+}
+
+/* ---------- Light theme ---------- */
+[data-theme="light"]{
   --bg:#f4f5f7;--surface:#fff;--text:#1a1a2e;--muted:#6b7280;
   --accent:#4f46e5;--accent-light:#818cf8;--accent-bg:#eef2ff;
   --success:#059669;--success-bg:#ecfdf5;--error:#dc2626;--error-bg:#fef2f2;
   --border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
-  --shadow-lg:0 10px 25px rgba(0,0,0,.1);--radius:12px;
-  --font-sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  --font-mono:'SF Mono',SFMono-Regular,ui-monospace,'DejaVu Sans Mono',Menlo,monospace;
+  --shadow-lg:0 10px 25px rgba(0,0,0,.1);
+  --chip-hover:#dbeafe;--reflection-bg:#fef9c3;
+  color-scheme:light;
 }
 
 html{font-size:16px;scroll-behavior:smooth}
@@ -73,7 +91,7 @@ textarea{resize:vertical;min-height:80px}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:hover{background:#4338ca;box-shadow:var(--shadow-lg)}
-.btn-primary:disabled{background:#a5b4fc;cursor:not-allowed;transform:none}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
 .btn-outline:hover{background:var(--bg)}
 .btn-success{background:var(--success);color:#fff}
@@ -88,7 +106,7 @@ textarea{resize:vertical;min-height:80px}
   background:var(--accent-bg);color:var(--accent);cursor:pointer;
   border:1px solid transparent;transition:all .2s;
 }
-.chip:hover{border-color:var(--accent);background:#dbeafe}
+.chip:hover{border-color:var(--accent);background:var(--chip-hover)}
 
 /* ---------- Progress bar ---------- */
 .progress-bar-container{
@@ -197,11 +215,26 @@ textarea{resize:vertical;min-height:80px}
 /* ---------- Confetti canvas ---------- */
 #confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99}
 
+/* ---------- Theme toggle ---------- */
+.theme-toggle{
+  position:fixed;top:1rem;right:1rem;z-index:50;
+  width:40px;height:40px;border-radius:50%;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:1.2rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow);transition:background .2s,border .2s;
+}
+.theme-toggle:hover{background:var(--accent-bg)}
+
+/* ---------- Input colors for dark mode ---------- */
+input[type="text"],input[type="password"],textarea{color:var(--text)}
+
 /* ---------- Hidden utility ---------- */
 .hidden{display:none!important}
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="theme-toggle" title="Toggle light/dark theme" aria-label="Toggle theme">🌙</button>
 
 <div class="container" id="app">
 
@@ -304,7 +337,7 @@ textarea{resize:vertical;min-height:80px}
       <div id="summary-steps"></div>
       <div class="root-cause-box" id="summary-root"></div>
       <div class="action-box" id="summary-action"></div>
-      <div style="background:#fef9c3;border-radius:8px;padding:1rem 1.2rem" id="summary-reflection"></div>
+      <div style="background:var(--reflection-bg);border-radius:8px;padding:1rem 1.2rem" id="summary-reflection"></div>
     </div>
 
     <div class="card no-print">
@@ -343,6 +376,23 @@ const screens = {
 
 // ——— Init ———
 document.addEventListener('DOMContentLoaded', () => {
+  // Theme toggle
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  updateThemeIcon(savedTheme);
+
+  $('theme-toggle').addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateThemeIcon(next);
+  });
+
+  function updateThemeIcon(theme) {
+    $('theme-toggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+
   // Restore remembered API key
   const saved = localStorage.getItem('openai_api_key');
   if (saved) {
