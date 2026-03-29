@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 Whys Root Cause Game</title>
+<style>
+/* ============================================================
+   CSS — Modern professional learning design
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#f4f5f7;--surface:#fff;--text:#1a1a2e;--muted:#6b7280;
+  --accent:#4f46e5;--accent-light:#818cf8;--accent-bg:#eef2ff;
+  --success:#059669;--success-bg:#ecfdf5;--error:#dc2626;--error-bg:#fef2f2;
+  --border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 25px rgba(0,0,0,.1);--radius:12px;
+  --font-sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --font-mono:'SF Mono',SFMono-Regular,ui-monospace,'DejaVu Sans Mono',Menlo,monospace;
+}
+
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:var(--font-sans);background:var(--bg);color:var(--text);
+  line-height:1.6;min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;padding:2rem 1rem;
+}
+
+/* ---------- Layout ---------- */
+.container{width:100%;max-width:680px}
+
+/* ---------- Card ---------- */
+.card{
+  background:var(--surface);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:2rem;margin-bottom:1.5rem;
+  animation:fadeUp .4s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---------- Typography ---------- */
+h1{font-size:1.75rem;font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.25rem;font-weight:600;margin-bottom:.75rem}
+h3{font-size:1rem;font-weight:600;margin-bottom:.5rem}
+p,.desc{color:var(--muted);font-size:.938rem;margin-bottom:1rem}
+small{font-size:.813rem;color:var(--muted)}
+
+/* ---------- Form elements ---------- */
+label{display:block;font-weight:500;font-size:.875rem;margin-bottom:.35rem}
+input[type="text"],input[type="password"],textarea{
+  width:100%;padding:.7rem .9rem;border:1px solid var(--border);
+  border-radius:8px;font-size:.938rem;font-family:var(--font-sans);
+  background:var(--bg);transition:border .2s,box-shadow .2s;
+}
+input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
+textarea{resize:vertical;min-height:80px}
+
+.field{margin-bottom:1.25rem}
+
+.checkbox-row{
+  display:flex;align-items:center;gap:.5rem;margin-top:.35rem;
+  font-size:.813rem;color:var(--muted);cursor:pointer;
+}
+.checkbox-row input{width:auto;accent-color:var(--accent)}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  padding:.7rem 1.4rem;border:none;border-radius:8px;font-size:.938rem;
+  font-weight:600;cursor:pointer;transition:background .2s,transform .1s,box-shadow .2s;
+  font-family:var(--font-sans);
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#4338ca;box-shadow:var(--shadow-lg)}
+.btn-primary:disabled{background:#a5b4fc;cursor:not-allowed;transform:none}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{background:var(--bg)}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover{background:#047857}
+.btn-sm{padding:.45rem .9rem;font-size:.813rem}
+.btn-block{width:100%}
+
+/* ---------- Example chips ---------- */
+.examples{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem}
+.chip{
+  padding:.4rem .8rem;border-radius:20px;font-size:.813rem;
+  background:var(--accent-bg);color:var(--accent);cursor:pointer;
+  border:1px solid transparent;transition:all .2s;
+}
+.chip:hover{border-color:var(--accent);background:#dbeafe}
+
+/* ---------- Progress bar ---------- */
+.progress-bar-container{
+  display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;
+}
+.progress-track{
+  flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;
+}
+.progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-light));
+  border-radius:3px;transition:width .5s ease;
+}
+.progress-label{font-size:.813rem;font-weight:600;color:var(--accent);white-space:nowrap}
+
+/* ---------- Step milestones ---------- */
+.milestones{display:flex;justify-content:space-between;margin-bottom:1.5rem}
+.milestone{
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:.813rem;font-weight:700;
+  border:2px solid var(--border);color:var(--muted);background:var(--surface);
+  transition:all .3s;
+}
+.milestone.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.milestone.done{border-color:var(--success);color:#fff;background:var(--success)}
+.milestone.done::after{content:'✓';font-size:.75rem}
+.milestone.done span{display:none}
+
+/* ---------- Chat bubble ---------- */
+.bubble{
+  background:var(--accent-bg);border-radius:12px 12px 12px 2px;
+  padding:1rem 1.2rem;margin-bottom:1rem;font-size:.938rem;
+  line-height:1.55;position:relative;
+}
+.bubble::before{
+  content:'🤔';position:absolute;top:-10px;left:-6px;font-size:1.25rem;
+}
+
+/* ---------- Loader ---------- */
+.loader{display:flex;align-items:center;gap:.6rem;padding:1rem 0}
+.loader .dots span{
+  display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--accent);animation:bounce .6s infinite alternate;
+}
+.loader .dots span:nth-child(2){animation-delay:.15s}
+.loader .dots span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{to{opacity:.3;transform:translateY(-6px)}}
+
+/* ---------- Validation ---------- */
+.error-msg{color:var(--error);font-size:.813rem;margin-top:.3rem;display:none}
+.error-msg.show{display:block}
+.toast{
+  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);
+  background:var(--error);color:#fff;padding:.6rem 1.2rem;border-radius:8px;
+  font-size:.875rem;font-weight:500;box-shadow:var(--shadow-lg);z-index:100;
+  animation:fadeUp .3s ease;
+}
+.toast.success{background:var(--success)}
+
+/* ---------- Summary section ---------- */
+.summary-step{
+  border-left:3px solid var(--accent);padding:.6rem 0 .6rem 1rem;margin-bottom:1rem;
+}
+.summary-step .q{font-weight:600;font-size:.875rem;color:var(--accent);margin-bottom:.25rem}
+.summary-step .a{font-size:.875rem;color:var(--text)}
+
+.root-cause-box{
+  background:var(--accent-bg);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem;
+}
+.action-box{
+  background:var(--success-bg);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem;
+}
+
+/* ---------- Badge ---------- */
+.badge{
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  padding:1.5rem;text-align:center;animation:popIn .5s ease both;
+}
+.badge .icon{font-size:3rem}
+.badge .title{font-size:1.25rem;font-weight:700;color:var(--accent)}
+.badge .subtitle{font-size:.875rem;color:var(--muted)}
+@keyframes popIn{
+  0%{opacity:0;transform:scale(.7)}
+  60%{transform:scale(1.05)}
+  100%{opacity:1;transform:scale(1)}
+}
+
+/* ---------- Actions row ---------- */
+.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+
+/* ---------- Print ---------- */
+@media print{
+  body{background:#fff;padding:0}
+  .btn,.actions,.no-print{display:none!important}
+  .card{box-shadow:none;break-inside:avoid}
+}
+
+/* ---------- Responsive ---------- */
+@media(max-width:600px){
+  body{padding:1rem .75rem}
+  .card{padding:1.25rem}
+  h1{font-size:1.4rem}
+  .milestones{gap:4px}
+  .milestone{width:30px;height:30px;font-size:.7rem}
+}
+
+/* ---------- Confetti canvas ---------- */
+#confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99}
+
+/* ---------- Hidden utility ---------- */
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+
+  <!-- ============================
+       SCREEN 1 — START
+       ============================ -->
+  <div id="screen-start">
+    <div class="card" style="text-align:center;padding:2.5rem 2rem 1.5rem">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">🔍</div>
+      <h1>5 Whys Root Cause Game</h1>
+      <p style="max-width:480px;margin:1rem auto">
+        Practice root cause analysis by answering guided <strong>Why</strong> questions.
+        An AI facilitator will help you dig deeper — one question at a time — to uncover
+        the real cause behind any problem.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Your Problem Statement</h2>
+      <p class="desc">Describe a real or hypothetical workplace problem to investigate.</p>
+
+      <div class="examples" id="examples">
+        <span class="chip" data-text="Customers complain about slow service">🐢 Slow customer service</span>
+        <span class="chip" data-text="Project deadlines are frequently missed">⏰ Missed deadlines</span>
+        <span class="chip" data-text="Learners are disengaged during training sessions">😴 Disengaged learners</span>
+        <span class="chip" data-text="Employee onboarding takes too long and new hires feel lost">🧭 Slow onboarding</span>
+      </div>
+
+      <div class="field">
+        <label for="problem">Problem Statement</label>
+        <textarea id="problem" placeholder="e.g. Our monthly reports are often late and contain errors…"></textarea>
+        <div class="error-msg" id="err-problem">Please enter a problem statement.</div>
+      </div>
+
+      <div class="field">
+        <label for="apikey">OpenAI API Key</label>
+        <input type="password" id="apikey" placeholder="sk-…">
+        <div class="error-msg" id="err-apikey">An API key is required to generate questions.</div>
+        <label class="checkbox-row">
+          <input type="checkbox" id="remember-key">
+          Remember my key on this device
+        </label>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="btn-start">Start Game →</button>
+    </div>
+  </div>
+
+  <!-- ============================
+       SCREEN 2 — GAME
+       ============================ -->
+  <div id="screen-game" class="hidden">
+    <div class="card no-print" style="padding:1.25rem 2rem">
+      <div class="progress-bar-container">
+        <span class="progress-label" id="step-label">Step 1 / 5</span>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+      <div class="milestones" id="milestones">
+        <div class="milestone active"><span>1</span></div>
+        <div class="milestone"><span>2</span></div>
+        <div class="milestone"><span>3</span></div>
+        <div class="milestone"><span>4</span></div>
+        <div class="milestone"><span>5</span></div>
+      </div>
+    </div>
+
+    <!-- AI question area -->
+    <div class="card" id="question-card">
+      <div id="loader" class="loader hidden">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <small>Generating next question…</small>
+      </div>
+      <div id="question-bubble" class="bubble hidden"></div>
+      <div class="field" id="answer-field" class="hidden">
+        <label for="answer">Your Answer</label>
+        <textarea id="answer" placeholder="Type your answer here…"></textarea>
+      </div>
+      <button class="btn btn-primary btn-block" id="btn-next" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ============================
+       SCREEN 3 — SUMMARY
+       ============================ -->
+  <div id="screen-summary" class="hidden">
+    <canvas id="confetti"></canvas>
+
+    <div class="card">
+      <div class="badge">
+        <div class="icon">🏆</div>
+        <div class="title">Root Cause Explorer</div>
+        <div class="subtitle">5 Whys Completed — Completion Score: 100%</div>
+      </div>
+    </div>
+
+    <div class="card" id="summary-content">
+      <h2>Analysis Summary</h2>
+      <div id="summary-problem"></div>
+      <hr style="border:0;border-top:1px solid var(--border);margin:1rem 0">
+      <div id="summary-steps"></div>
+      <div class="root-cause-box" id="summary-root"></div>
+      <div class="action-box" id="summary-action"></div>
+      <div style="background:#fef9c3;border-radius:8px;padding:1rem 1.2rem" id="summary-reflection"></div>
+    </div>
+
+    <div class="card no-print">
+      <div class="actions">
+        <button class="btn btn-outline btn-sm" id="btn-copy">📋 Copy Summary</button>
+        <button class="btn btn-outline btn-sm" id="btn-print">🖨️ Print / PDF</button>
+        <button class="btn btn-success btn-sm" id="btn-again">🔄 Play Again</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   JavaScript — Game Logic & OpenAI Integration
+   ============================================================ */
+
+// ——— State ———
+const state = {
+  apiKey: '',
+  problem: '',
+  step: 0,           // 0-based, 0..4
+  questions: [],
+  answers: [],
+  summary: null,
+  conversationHistory: []
+};
+
+// ——— DOM refs ———
+const $ = id => document.getElementById(id);
+const screens = {
+  start:   $('screen-start'),
+  game:    $('screen-game'),
+  summary: $('screen-summary')
+};
+
+// ——— Init ———
+document.addEventListener('DOMContentLoaded', () => {
+  // Restore remembered API key
+  const saved = localStorage.getItem('openai_api_key');
+  if (saved) {
+    $('apikey').value = saved;
+    $('remember-key').checked = true;
+  }
+
+  // Example chips
+  $('examples').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (chip) $('problem').value = chip.dataset.text;
+  });
+
+  // Start button
+  $('btn-start').addEventListener('click', startGame);
+
+  // Next button
+  $('btn-next').addEventListener('click', submitAnswer);
+
+  // Enable Next when user types
+  $('answer').addEventListener('input', () => {
+    $('btn-next').disabled = !$('answer').value.trim();
+  });
+
+  // Summary buttons
+  $('btn-copy').addEventListener('click', copySummary);
+  $('btn-print').addEventListener('click', () => window.print());
+  $('btn-again').addEventListener('click', resetGame);
+});
+
+// ——— Screen transitions ———
+function showScreen(name) {
+  Object.values(screens).forEach(s => s.classList.add('hidden'));
+  screens[name].classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ——— Validation ———
+function validate() {
+  let ok = true;
+  if (!$('problem').value.trim()) {
+    $('err-problem').classList.add('show'); ok = false;
+  } else {
+    $('err-problem').classList.remove('show');
+  }
+  if (!$('apikey').value.trim()) {
+    $('err-apikey').classList.add('show'); ok = false;
+  } else {
+    $('err-apikey').classList.remove('show');
+  }
+  return ok;
+}
+
+// ============================================================
+//  startGame() — Initialise state and request first question
+// ============================================================
+async function startGame() {
+  if (!validate()) return;
+
+  state.apiKey  = $('apikey').value.trim();
+  state.problem = $('problem').value.trim();
+  state.step = 0;
+  state.questions = [];
+  state.answers = [];
+  state.summary = null;
+
+  // Persist key if opted in
+  if ($('remember-key').checked) {
+    localStorage.setItem('openai_api_key', state.apiKey);
+  } else {
+    localStorage.removeItem('openai_api_key');
+  }
+
+  // Build initial conversation
+  state.conversationHistory = [
+    {
+      role: 'system',
+      content: `You are a professional root cause analysis facilitator helping adult learners practice the 5 Whys method. Your job is to ask exactly one focused "Why" question at a time, based on the learner's original problem and their most recent answer. Each question must be practical, concise, and designed to uncover deeper causes such as process gaps, unclear roles, lack of training, communication breakdowns, poor systems, missing resources, or policy issues. Do NOT ask generic "Why?" — always make the question specific and contextual. Respond with ONLY the question text, no preamble or numbering.`
+    },
+    {
+      role: 'user',
+      content: `Here is the problem statement I want to investigate using the 5 Whys technique:\n\n"${state.problem}"\n\nPlease ask the first Why question.`
+    }
+  ];
+
+  showScreen('game');
+  renderProgress();
+  await askWhyQuestion();
+}
+
+// ============================================================
+//  askWhyQuestion() — Call OpenAI for the next Why question
+// ============================================================
+async function askWhyQuestion() {
+  $('loader').classList.remove('hidden');
+  $('question-bubble').classList.add('hidden');
+  $('answer-field').classList.add('hidden');
+  $('btn-next').disabled = true;
+  $('answer').value = '';
+
+  try {
+    const question = await callOpenAI(state.conversationHistory);
+    state.questions.push(question);
+
+    // Show question
+    $('question-bubble').textContent = question;
+    $('question-bubble').classList.remove('hidden');
+    $('answer-field').classList.remove('hidden');
+    $('answer').focus();
+  } catch (err) {
+    showToast(err.message || 'API request failed. Check your key and try again.', true);
+    showScreen('start');
+  } finally {
+    $('loader').classList.add('hidden');
+  }
+}
+
+// ============================================================
+//  submitAnswer() — Record answer and proceed
+// ============================================================
+async function submitAnswer() {
+  const answer = $('answer').value.trim();
+  if (!answer) return;
+
+  state.answers.push(answer);
+
+  // Append assistant question and user answer to conversation
+  state.conversationHistory.push(
+    { role: 'assistant', content: state.questions[state.step] },
+    { role: 'user', content: answer }
+  );
+
+  state.step++;
+  renderProgress();
+
+  if (state.step < 5) {
+    // Ask next Why
+    state.conversationHistory.push({
+      role: 'user',
+      content: `Based on my answer, please ask the next Why question (this is Why #${state.step + 1} of 5).`
+    });
+    await askWhyQuestion();
+  } else {
+    // All 5 done — generate summary
+    await generateSummary();
+  }
+}
+
+// ============================================================
+//  generateSummary() — Final AI call for root cause & action
+// ============================================================
+async function generateSummary() {
+  $('loader').classList.remove('hidden');
+  $('question-bubble').classList.add('hidden');
+  $('answer-field').classList.add('hidden');
+  $('btn-next').classList.add('hidden');
+
+  const summaryPrompt = `All 5 Why questions and answers are now complete. Based on the full conversation, provide a JSON object (no markdown fences) with these keys:
+- "rootCause": a concise statement of the likely root cause (1-2 sentences)
+- "action": one specific recommended corrective action (1-2 sentences)
+- "reflection": a thoughtful reflection prompt question for the learner (1 sentence)
+
+Respond with ONLY the JSON object.`;
+
+  state.conversationHistory.push({ role: 'user', content: summaryPrompt });
+
+  try {
+    const raw = await callOpenAI(state.conversationHistory);
+    // Parse JSON — handle possible markdown fences
+    const cleaned = raw.replace(/```json?\s*/g, '').replace(/```/g, '').trim();
+    state.summary = JSON.parse(cleaned);
+    renderSummary();
+    showScreen('summary');
+    fireConfetti();
+  } catch (err) {
+    // Fallback summary
+    state.summary = {
+      rootCause: 'Unable to generate AI summary. Review your answers above to identify the root cause.',
+      action: 'Consider discussing these findings with your team to determine next steps.',
+      reflection: 'What patterns do you notice in your answers?'
+    };
+    renderSummary();
+    showScreen('summary');
+  } finally {
+    $('loader').classList.add('hidden');
+  }
+}
+
+// ============================================================
+//  renderProgress() — Update progress bar and milestones
+// ============================================================
+function renderProgress() {
+  const pct = (state.step / 5) * 100;
+  $('progress-fill').style.width = pct + '%';
+  $('step-label').textContent = `Step ${Math.min(state.step + 1, 5)} / 5`;
+
+  const stones = $('milestones').children;
+  for (let i = 0; i < 5; i++) {
+    stones[i].className = 'milestone';
+    if (i < state.step) stones[i].classList.add('done');
+    else if (i === state.step) stones[i].classList.add('active');
+  }
+}
+
+// ============================================================
+//  renderSummary() — Build the results screen
+// ============================================================
+function renderSummary() {
+  // Problem
+  $('summary-problem').innerHTML = `<h3>Problem Statement</h3><p style="font-size:.938rem">${esc(state.problem)}</p>`;
+
+  // Steps
+  let html = '';
+  for (let i = 0; i < 5; i++) {
+    html += `<div class="summary-step">
+      <div class="q">Why ${i + 1}: ${esc(state.questions[i] || '—')}</div>
+      <div class="a">${esc(state.answers[i] || '—')}</div>
+    </div>`;
+  }
+  $('summary-steps').innerHTML = html;
+
+  // Root cause
+  $('summary-root').innerHTML = `<h3>🎯 Likely Root Cause</h3><p style="font-size:.938rem">${esc(state.summary.rootCause)}</p>`;
+  $('summary-action').innerHTML = `<h3>✅ Recommended Corrective Action</h3><p style="font-size:.938rem">${esc(state.summary.action)}</p>`;
+  $('summary-reflection').innerHTML = `<h3>💡 Reflection Prompt</h3><p style="font-size:.938rem">${esc(state.summary.reflection)}</p>`;
+}
+
+// ============================================================
+//  resetGame() — Return to start screen
+// ============================================================
+function resetGame() {
+  state.step = 0;
+  state.questions = [];
+  state.answers = [];
+  state.summary = null;
+  state.conversationHistory = [];
+  $('problem').value = '';
+  $('answer').value = '';
+  $('btn-next').classList.remove('hidden');
+  $('btn-next').disabled = true;
+  renderProgress();
+  showScreen('start');
+}
+
+// ============================================================
+//  callOpenAI() — Chat Completions API call
+// ============================================================
+async function callOpenAI(messages) {
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${state.apiKey}`
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 300
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API error ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.choices[0].message.content.trim();
+}
+
+// ============================================================
+//  copySummary() — Copy plain-text summary to clipboard
+// ============================================================
+function copySummary() {
+  let text = `5 WHYS ROOT CAUSE ANALYSIS\n${'='.repeat(35)}\n\n`;
+  text += `Problem: ${state.problem}\n\n`;
+  for (let i = 0; i < 5; i++) {
+    text += `Why ${i + 1}: ${state.questions[i]}\nAnswer: ${state.answers[i]}\n\n`;
+  }
+  text += `Root Cause: ${state.summary.rootCause}\n`;
+  text += `Corrective Action: ${state.summary.action}\n`;
+  text += `Reflection: ${state.summary.reflection}\n`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Summary copied to clipboard!');
+  }).catch(() => {
+    showToast('Could not copy — please select and copy manually.', true);
+  });
+}
+
+// ============================================================
+//  Toast notifications
+// ============================================================
+function showToast(msg, isError = false) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (isError ? '' : ' success');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ============================================================
+//  Confetti 🎉 — lightweight canvas confetti
+// ============================================================
+function fireConfetti() {
+  const canvas = $('confetti');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const pieces = [];
+  const colors = ['#4f46e5','#818cf8','#059669','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
+  for (let i = 0; i < 120; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      w: Math.random() * 8 + 4,
+      h: Math.random() * 6 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx: (Math.random() - 0.5) * 3,
+      vy: Math.random() * 3 + 2,
+      rot: Math.random() * 360,
+      rv: (Math.random() - 0.5) * 8
+    });
+  }
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.rv;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+    frame++;
+    if (frame < 180) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+// ============================================================
+//  Utility — HTML escape
+// ============================================================
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+
+</body>
+</html>
